@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" "http://java.sun.com/dtd/web-app_2_3.dtd">
+<web-app>
+    <!-- Servlets -->
+    <servlet>
+        <servlet-name>WixatCreateServlet</servlet-name>
+        <servlet-class>org.jivesoftware.openfire.plugin.wixat.WixatCreateServlet</servlet-class>
+    </servlet>
+    
+    <servlet>
+        <servlet-name>WixatCheckServlet</servlet-name>
+        <servlet-class>org.jivesoftware.openfire.plugin.wixat.WixatCheckServlet</servlet-class>
+    </servlet>
+    
+    <servlet>
+        <servlet-name>WixatContactsServlet</servlet-name>
+        <servlet-class>org.jivesoftware.openfire.plugin.wixat.WixatContactsServlet</servlet-class>
+    </servlet>
+
+    <!-- Servlet mappings -->
+    <servlet-mapping>
+        <servlet-name>WixatCreateServlet</servlet-name>
+        <url-pattern>/create</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+		<servlet-name>WixatCheckServlet</servlet-name>
+        <url-pattern>/check</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+		<servlet-name>WixatContactsServlet</servlet-name>
+        <url-pattern>/contacts</url-pattern>
+    </servlet-mapping>
+
+</web-app>

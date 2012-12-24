@@ -1,0 +1,124 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<title>Presence Plugin Readme</title>
+    <style type="text/css">
+        BODY {
+            font-size : 100%;
+        }
+        BODY, TD, TH {
+            font-family : tahoma, verdana, arial, helvetica, sans-serif;
+            font-size : 0.8em;
+        }
+        H2 {
+             font-size : 10pt;
+             font-weight : bold;
+        }
+        A:hover {
+            text-decoration : none;
+        }
+        H1 {
+            font-family : tahoma, arial, helvetica, sans-serif;
+            font-size : 1.4em;
+            font-weight: bold;
+            border-bottom : 1px #ccc solid;
+            padding-bottom : 2px;
+        }
+
+        TT {
+            font-family : courier new;
+            font-weight : bold;
+            color : #060;
+        }
+        PRE {
+            font-family : courier new;
+            font-size : 100%;
+        }
+        #datatable TH {
+            color : #fff;
+            background-color : #2A448C;
+            text-align : left;
+        }
+        #datatable TD {
+            background-color : #FAF6EF;
+        }
+        #datatable .name {
+            background-color : #DCE2F5;
+        }
+    </style>
+</head>
+<body>
+
+<h1>
+Wixat Plugin Readme
+</h1>
+
+<h2>Overview</h2>
+
+<p>
+The presence plugin is a service that provides simple user creation by using crypted information
+</p>
+
+<h2>Installation</h2>
+
+<p>Copy wixat.jar into the plugins directory of your Openfire installation. The
+plugin will then be automatically deployed. To upgrade to a new version, copy the new
+presence.jar file over the existing file.</p>
+
+<h2>Configuration</h2>
+
+The wixat plugin can be configured via the Openfire Admin Console.
+Use the configuration page to specify the secret word (only your applications should know it)
+and the crypto key. This key must be the same in your client application.
+
+<h2>Using the Plugin</h2>
+
+Create an user: [hostname]/plugins/wixat/create
+<br>
+Check if exists an user: [hostname]/plugins/wixat/check
+<p>
+
+The following parameters can be passed into the request:<p>
+
+<div id="datatable">
+<table cellpadding="3" cellspacing="1" border="0" width="700">
+<tr>
+    <th colspan=2>phone</th><th>Description</th>
+</tr>
+<tr>
+    <td class="name">phone</td><td>Required</td><td>The crypted phone number (it will be the username). It also must be encoded in base64</td>
+</tr>
+<tr>
+    <td class="name">secret</td><td>Required</td><td>Secret word specified in the plugin configuration</td>
+</tr>
+<tr>
+    <td class="name">password</td><td>Required when creation</td><td> Crypted user password. It also must be encoded in base64</td>
+</tr>
+</table><p>
+
+
+<p><b>Sample</b></p>
+
+<p>The following example is the simplest form of creating an user</p>
+
+<ul>
+<form>
+<textarea cols=65 rows=3 wrap=virtual>http://example.com:9090//plugins/wixat/create?phone=CvUB7f20N0TLljjMbZO14Q==&secret=4qdA13os&password=k8basi7uV/0=
+</textarea>
+</form>
+</ul>
+
+<p>The following example allows you to check if an user already exists</p>
+
+<ul>
+<form>
+<textarea cols=65 rows=4 wrap=virtual>
+http://example.com:9090/plugins/wixat/check?phone=CvUB7f20N0TLljjMbZO14Q==&secret=4qdA13os"
+</textarea>
+</form>
+</ul>
+
+
+</body>
+</html>

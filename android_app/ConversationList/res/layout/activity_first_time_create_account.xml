@@ -1,0 +1,66 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    tools:context=".FirstTimeCreateAccount" >
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:gravity="center"
+        android:text="@string/first_time_create_account" />
+
+    <EditText
+        android:id="@+id/createPassword"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textView1"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="40dp"
+        android:ems="10"
+        android:inputType="textPassword" >
+
+        <requestFocus />
+    </EditText>
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/createPassword"
+        android:layout_below="@+id/textView1"
+        android:layout_marginTop="22dp"
+        android:text="@string/password" />
+
+    <EditText
+        android:id="@+id/createPasswordConfirm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/createPassword"
+        android:layout_below="@+id/createPassword"
+        android:layout_marginTop="36dp"
+        android:ems="10"
+        android:inputType="textPassword" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/createPasswordConfirm"
+        android:layout_below="@+id/createPassword"
+        android:layout_marginTop="19dp"
+        android:text="@string/password_again" />
+
+    <Button
+        android:id="@+id/createPasswordButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/createPasswordConfirm"
+        android:layout_centerHorizontal="true"
+        android:onClick="createPassword"
+        android:text="@string/continueString" />
+
+</RelativeLayout>

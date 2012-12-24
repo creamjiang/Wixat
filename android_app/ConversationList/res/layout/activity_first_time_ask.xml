@@ -1,0 +1,61 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    tools:context=".FirstTimeAskActivity" >
+
+    <TextView
+        android:id="@+id/textView1"
+        android:gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="22dp"
+        android:text="@string/no_number_desc" />
+
+    <Button
+        android:id="@+id/butAcceptPhone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/phoneTxt"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="22dp"
+        android:onClick="continueButton"
+        android:text="@string/continueString" />
+
+    <TextView
+        android:id="@+id/phone_pefix"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/phoneTxt"
+        android:layout_alignBottom="@+id/phoneTxt"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="14dp"
+        android:text="@string/number_prefix"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <EditText
+        android:id="@+id/phoneTxt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textView1"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="25dp"
+        android:layout_toRightOf="@+id/phone_pefix"
+        android:ems="10"
+        android:gravity="center"
+        android:inputType="phone"
+        android:maxLength="9" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/butAcceptPhone"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:text="@string/no_number_warning" />
+
+</RelativeLayout>

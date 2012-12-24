@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<plugin>
+    <class>org.jivesoftware.openfire.plugin.WixatPlugin</class>
+    <name>Wixat Service</name>
+    <description>Create and check users for Wixat Android Application</description>
+    <author>Alvaro Garcia</author>
+    <version>1.0</version>
+    <date>22/12/2012</date>
+    <minServerVersion>3.7.0</minServerVersion>
+	
+    <adminconsole>		
+        <tab id="tab-server">
+            <sidebar id="sidebar-server-settings">
+                <item id="wixat-service" name="Wixat Service" url="wixat-service.jsp"
+                     description="Click to manage the configuration" />
+            </sidebar>
+        </tab>
+    </adminconsole>
+</plugin>

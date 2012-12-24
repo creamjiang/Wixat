@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/green_bubble"
+    android:orientation="horizontal"
+    android:padding="5dip" >
+
+        
+		<!-- Person name-->
+	    <TextView
+	        android:id="@+id/name"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text=""
+	        android:textColor="#040404"
+	        android:typeface="sans" 
+	        android:textSize="12dip"
+	        android:paddingLeft="15dip"
+	        android:textStyle="bold"/>
+	
+		<!-- Text -->
+	    <TextView
+	        android:id="@+id/text"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_below="@id/name"
+	        android:textColor="#343434"
+	        android:textSize="10dip"
+	        android:paddingLeft="15dip"
+	        android:layout_marginTop="1dip"
+	        android:text="" />
+	
+		<!-- Time -->
+	    <TextView
+	        android:id="@+id/time"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_alignParentRight="true"
+	        android:layout_alignTop="@id/name"
+	        android:gravity="right"
+	        android:text=""
+	        android:layout_marginRight="10dip"
+	        android:textSize="10dip"
+	        android:textColor="#10bcc9"
+	        android:textStyle="bold"/>
+      
+
+</RelativeLayout>

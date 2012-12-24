@@ -1,0 +1,67 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <EditText
+        android:id="@+id/username"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="78dp"
+        android:ems="10"
+        android:hint="@string/username" />
+
+    <TextView
+        android:id="@+id/usernameTxt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/username"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="53dp"
+        android:text="@string/username" />
+
+    <EditText
+        android:id="@+id/password"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/username"
+        android:layout_below="@+id/username"
+        android:layout_marginTop="58dp"
+        android:ems="10"
+        android:inputType="textPassword" >
+
+        <requestFocus />
+    </EditText>
+
+    <Button
+        android:id="@+id/button1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/password"
+        android:layout_marginTop="24dp"
+        android:layout_toRightOf="@+id/usernameTxt"
+        android:text="@string/connect" 
+        android:onClick="connectToNode"/>
+
+    <TextView
+        android:id="@+id/passwordTxt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/password"
+        android:layout_below="@+id/username"
+        android:layout_marginTop="32dp"
+        android:text="@string/password" />
+
+    <TextView
+        android:id="@+id/hostname"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="15dp"
+        android:text=""
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+</RelativeLayout>
