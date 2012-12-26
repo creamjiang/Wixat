@@ -18,7 +18,7 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-        <service android:name="com.wixet.wixat.service.SomeService1" >
+        <service android:name="com.wixet.wixat.service.WixatService" >
         </service>
 
         <activity

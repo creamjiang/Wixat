@@ -6,12 +6,11 @@ import java.util.HashMap;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import android.provider.ContactsContract;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +20,6 @@ import android.widget.TextView;
 
 import com.wixet.wixat.LoadingScreenActivity;
 import com.wixet.wixat.R;
-import com.wixet.wixat.database.Chat;
 
 public class ContactListArrayAdapter extends ArrayAdapter<HashMap<String, String>> {
 

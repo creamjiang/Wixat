@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.Key;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.crypto.spec.SecretKeySpec;
@@ -30,11 +31,12 @@ import android.util.Log;
 import android.view.Menu;
 
 import com.wixet.utils.Encryption;
+import com.wixet.utils.ServerConfiguration;
 import com.wixet.wixat.database.DataBaseHelper;
 
 public class LoadContactsActivity extends Activity {
 
-	
+	DataBaseHelper database;
 	public static final String MESSAGE = "message";
 	
 	private class GetContacts extends AsyncTask<Intent, Integer, Long> {
@@ -51,6 +53,9 @@ public class LoadContactsActivity extends Activity {
 		    Intent i = new Intent();
 		    /* Get all phones */
 		    
+		    //Its usually to have duplicated numbers
+		    HashSet<String> uniqueNumbers = new HashSet<String>();
+		    
 			try {
 				
 				String telephones ="";
@@ -59,30 +64,31 @@ public class LoadContactsActivity extends Activity {
 		    	{
 		    	  String phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
 		    	  phoneNumber = phoneNumber.replaceAll("\\s+", "");
+		    	  phoneNumber = phoneNumber.replaceAll("-", "");
 		    	  
 		    	  if(phoneNumber.indexOf("+")==0){
 		    		  phoneNumber = phoneNumber.substring(2, phoneNumber.length());
 		    	  }
 		    	  
-		    	  if(phoneNumber.length() == 9 && !db.existsChat(phoneNumber+"@46.137.8.44")){
+		    	  if(phoneNumber.length() == 9 && !uniqueNumbers.contains(phoneNumber) && !db.existsChat(phoneNumber+"@"+ServerConfiguration.HOSTNAME)){
 		    		  telephones += phoneNumber+",";
-
+		    		  uniqueNumbers.add(phoneNumber);
 		    	  }
 		    	  
 
 		    	}
 		    	//remove last comma
 		    	phones.close();
+		    	
 		    	if(telephones.length() > 0){
-			    	telephones.substring(0, telephones.length()-1);
+			    	telephones = telephones.substring(0, telephones.length()-1);
 			    	
-					Key sharedKey = new SecretKeySpec(Encryption.decode(LoadingScreenActivity.KEY), "DESede");
-					String url = "http://46.137.8.44:9090/plugins/wixat/contacts";
+					Key sharedKey = new SecretKeySpec(Encryption.decode(ServerConfiguration.KEY), "DESede");
 					
-					HttpPost p = new HttpPost(url);
+					HttpPost p = new HttpPost(ServerConfiguration.CONTACTS_URL);
 			        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
 			        nameValuePairs.add(new BasicNameValuePair("phones", Encryption.encrypt(sharedKey, telephones)));
-			        nameValuePairs.add(new BasicNameValuePair("secret", LoadingScreenActivity.SECRET));
+			        nameValuePairs.add(new BasicNameValuePair("secret", ServerConfiguration.SECRET));
 			        p.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 	
 					
@@ -94,21 +100,24 @@ public class LoadContactsActivity extends Activity {
 				        response.getEntity().writeTo(out);
 				        out.close();
 				        String responseString = out.toString().trim();
-				        	//Number already exists
+
 				        
 				        String contacts = Encryption.decrypt(sharedKey, responseString);
-				        
-						i.putExtra(MESSAGE, contacts.split(","));
+				        if(contacts.length() > 0){
+				        	i.putExtra(MESSAGE, contacts.split(","));
+				        }
 	
 						setResult(RESULT_OK,i);
 	
 				    } else{
 				        //Closes the connection.
+				    	//Log.d("ERROR",statusLine.getReasonPhrase());
 				        response.getEntity().getContent().close();
 				        throw new IOException(statusLine.getReasonPhrase());
 				    }
 		    	}else{
-		    		
+		    		//Log.d("Aviso","No hay coincidencias");
+		    		setResult(RESULT_OK,i);
 		    	}
 			} catch (IOException e) {
 				Log.d("EXCEPTION","Error"+e.getMessage());
@@ -134,12 +143,18 @@ public class LoadContactsActivity extends Activity {
 		
 		setContentView(R.layout.activity_loading_screen);
 		//Intent i = getIntent();
-		DataBaseHelper db = new DataBaseHelper(this);
-		new GetContacts(db).execute();
+		database = new DataBaseHelper(this);
+		new GetContacts(database).execute();
 		
 		
 	}
 	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		database.close();
+		
+	}
 /*	private void showContacts(){
 		setContentView(R.layout.activity_load_contacts);
 	}

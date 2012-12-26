@@ -21,14 +21,12 @@ public class ConversationArrayAdapter extends ArrayAdapter<HashMap<String, Strin
 
 
     Context context;
-    int layoutResourceId;   
     String me;
     ArrayList<HashMap<String, String>> data = null;
     //SparseArray<View> cache = null;
     
-	public ConversationArrayAdapter(Context context, int textViewResourceId, ArrayList<HashMap<String, String>> objects, String me) {
-		super(context, textViewResourceId, objects);
-        this.layoutResourceId = textViewResourceId;
+	public ConversationArrayAdapter(Context context, ArrayList<HashMap<String, String>> objects, String me) {
+		super(context, 0, objects);
         this.context = context;
         this.data = objects;
         this.me = me;

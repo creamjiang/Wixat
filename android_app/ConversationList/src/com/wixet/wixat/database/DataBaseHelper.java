@@ -9,7 +9,6 @@ import java.util.Locale;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
@@ -25,7 +24,9 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     private static final String BOOLEAN_TYPE = " BOOLEAN";
     private static final String COMMA_SEP = ",";
     private static final String UNIQUE = " UNIQUE";
-   
+    private SQLiteDatabase database;
+
+    
     
     public static final String SQL_CREATE_NODE =     
     		"CREATE TABLE " + Node.TABLE_NAME + " (" +
@@ -74,6 +75,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
     public DataBaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        database = getWritableDatabase();
     }
     
     @Override
@@ -110,15 +112,12 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     	values.put(Node.COLUMN_NAME_HOST, host);
     	values.put(Node.COLUMN_NAME_USERNAME, username);
     	values.put(Node.COLUMN_NAME_PASSWORD, password);
-    	SQLiteDatabase dbw = getWritableDatabase();
-    	dbw.insert( Node.TABLE_NAME, null, values);
-    	dbw.close();
+    	database.insert( Node.TABLE_NAME, null, values);
     }
     
     public boolean existsChat(String participant){
 
     	/* Se podría utilizar count(*) de sql pero como sólo hay un resultado o 0 pues así es más sencillo */
-    	SQLiteDatabase dbr = getReadableDatabase();
     	// Define a projection that specifies which columns from the database
     	// you will actually use after this query.
     	String[] projection = {
@@ -129,7 +128,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     	String selection = Chat.COLUMN_NAME_PARTICIPANT + " =  ?";
     	String[] selectionArgs = { participant };
     	
-    	Cursor c = dbr.query(
+    	Cursor c = database.query(
     		    Chat.TABLE_NAME,  // The table to query
     		    projection,                               // The columns to return
     		    selection,                                // The columns for the WHERE clause
@@ -140,51 +139,71 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     		    );
     	boolean exists = c.getCount() > 0;
     	c.close();
-    	dbr.close();
 
     	return exists;
     	
     }
     
-    public void insertMessage(String conversationId, String author, String text ){
+    public void insertMessage(int conversationId, String author, String text ){
     	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US); 
     	Date date = new Date();
     	ContentValues values = new ContentValues();
-    	values.put(ChatMessage.COLUMN_NAME_CHAT_ID, conversationId);
+    	values.put(ChatMessage.COLUMN_NAME_CHAT_ID, conversationId+"");
     	values.put(ChatMessage.COLUMN_NAME_AUTHOR, author);
     	values.put(ChatMessage.COLUMN_NAME_BODY, text);
     	values.put(ChatMessage.COLUMN_NAME_CREATED_AT, dateFormat.format(date));
-    	SQLiteDatabase dbw = getWritableDatabase();
-    	dbw.insert( ChatMessage.TABLE_NAME, null, values);
-    	dbw.close();
+    	database.insert( ChatMessage.TABLE_NAME, null, values);
+    	
     }
     
     
-    public void removeChat(String id ){
-    	SQLiteDatabase dbw = getWritableDatabase();
+    public void removeConversation(int id ){
 
-    	dbw.delete(ChatMessage.TABLE_NAME, ChatMessage.COLUMN_NAME_CHAT_ID + "= ?", new String[] { id } );
-    	dbw.delete(Chat.TABLE_NAME, Chat._ID + "= ?", new String[] { id } );
-    	dbw.close();
+    	database.delete(ChatMessage.TABLE_NAME, ChatMessage.COLUMN_NAME_CHAT_ID + "= ?", new String[] { id+"" } );
+    	database.delete(Chat.TABLE_NAME, Chat._ID + "= ?", new String[] { id+"" } );
     }
     
-    public long insertChat(String participant){
+    public long insertChat(String participant, boolean notify){
     	//Get the id of the node
     	
     	// Insert conversation
     	ContentValues values = new ContentValues();
     	//values.put(Chat.COLUMN_NAME_NODE_ID, getNodeId(node));
     	values.put(Chat.COLUMN_NAME_PARTICIPANT, participant);
-    	values.put(Chat.COLUMN_NAME_NEW_MESSAGES, "1");
+    	values.put(Chat.COLUMN_NAME_NEW_MESSAGES, notify?"1":"0");
 
-    	SQLiteDatabase dbw = getWritableDatabase();
-    	long id = dbw.insert( Chat.TABLE_NAME, null, values);
-    	dbw.close();
-    	return id;
+    	return database.insert( Chat.TABLE_NAME, null, values);
+    }
+    
+    public String getParticipant(int conversationId){
+    	// Define a projection that specifies which columns from the database
+    	// you will actually use after this query.
+    	String[] projection = {
+    	    Chat.COLUMN_NAME_PARTICIPANT
+    	    };
+
+    	String selection = Chat._ID + " =  ?";
+    	String[] selectionArgs = { conversationId+"" };
+    	
+    	Cursor c = database.query(
+    		    Chat.TABLE_NAME,  // The table to query
+    		    projection,                               // The columns to return
+    		    selection,                                // The columns for the WHERE clause
+    		    selectionArgs,                            // The values for the WHERE clause
+    		    null,                                     // don't group the rows
+    		    null,                                     // don't filter by row groups
+    		    null                                 // The sort order
+    		    );
+    	c.moveToFirst();
+    	
+    	String participant = c.getString(
+    	    c.getColumnIndexOrThrow(Chat.COLUMN_NAME_PARTICIPANT)
+    	);
+    	c.close();
+    	return participant;
     }
     
     public long getNodeId(String node){
-    	SQLiteDatabase dbr = getReadableDatabase();
     	// Define a projection that specifies which columns from the database
     	// you will actually use after this query.
     	String[] projection = {
@@ -195,7 +214,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     	String selection = Node.COLUMN_NAME_HOST + " =  ?";
     	String[] selectionArgs = { node };
     	
-    	Cursor c = dbr.query(
+    	Cursor c = database.query(
     		    Node.TABLE_NAME,  // The table to query
     		    projection,                               // The columns to return
     		    selection,                                // The columns for the WHERE clause
@@ -210,21 +229,19 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     	    c.getColumnIndexOrThrow(Node._ID)
     	);
     	c.close();
-    	dbr.close();
     	return nodeId;
     }
     
     
     public HashMap<String,String> getConversation(String conversationId){
     	HashMap<String,String> data = new HashMap<String,String>();
-    	SQLiteDatabase dbr = getReadableDatabase();
     	String[] projection = {
     	    Chat._ID,
     	    Chat.COLUMN_NAME_PARTICIPANT,
     	    Chat.COLUMN_NAME_NEW_MESSAGES,
     	    };
     	
-    	Cursor c = dbr.query(
+    	Cursor c = database.query(
     		    Chat.TABLE_NAME,  // The table to query
     		    projection,                               // The columns to return
     		    Chat._ID+" = ?",                                // The columns for the WHERE clause
@@ -242,20 +259,18 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     		data.put(Chat.COLUMN_NAME_NEW_MESSAGES,c.getString(c.getColumnIndexOrThrow(Chat.COLUMN_NAME_NEW_MESSAGES)));
     	}
     	c.close();
-    	dbr.close();
     	return data;
     }
-    public String getConversationId(String participant){
+    public int getConversationId(String participant){
     	/*Returns string to make easier build queries. May change in future*/
 		// Get the entries
     	//TODO hacer que vaya para node
-        SQLiteDatabase dbr = getReadableDatabase();
         String conversationId = null;
     	String[] projection = {
     	    Chat._ID,
     	    };
     	
-    	Cursor c = dbr.query(
+    	Cursor c = database.query(
     		    Chat.TABLE_NAME,  // The table to query
     		    projection,                               // The columns to return
     		    Chat.COLUMN_NAME_PARTICIPANT+" = ?",                                // The columns for the WHERE clause
@@ -271,24 +286,21 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     		conversationId = c.getString(c.getColumnIndexOrThrow(Chat._ID));    	    
     	}
     	c.close();
-    	dbr.close();
-    	return conversationId;
+    	//Log.d("CONVERSATION","VALE "+conversationId);
+    	return Integer.parseInt(conversationId);
     }
     
     
-    public ArrayList<HashMap<String, String>> getConversations(){
-    	
-    	ArrayList<HashMap<String, String>> conversationList = new ArrayList<HashMap<String, String>>();
+    public Cursor getConversations(){
         
 		// Get the entries
-        SQLiteDatabase dbr = getReadableDatabase();
     	String[] projection = {
     	    Chat._ID,
     	    Chat.COLUMN_NAME_PARTICIPANT,
     	    Chat.COLUMN_NAME_NEW_MESSAGES
     	    };
     	
-    	Cursor c = dbr.query(
+    	Cursor c = database.query(
     		    Chat.TABLE_NAME,  // The table to query
     		    projection,                               // The columns to return
     		    null,                                // The columns for the WHERE clause
@@ -297,31 +309,16 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     		    null,                                     // don't filter by row groups
     		    null                                 // The sort order
     		    );
-    	c.moveToFirst();
-    	while (c.isAfterLast() == false) 
-    	{
-    		HashMap<String, String> map = new HashMap<String, String>();
-    		
-    		map.put(Chat._ID, c.getString(c.getColumnIndexOrThrow(Chat._ID)));
-    		map.put(Chat.COLUMN_NAME_PARTICIPANT, c.getString(c.getColumnIndexOrThrow(Chat.COLUMN_NAME_PARTICIPANT)));
-    		map.put(Chat.COLUMN_NAME_NEW_MESSAGES, c.getInt(c.getColumnIndexOrThrow(Chat.COLUMN_NAME_NEW_MESSAGES))+"");
 
-    	    
-    	    conversationList.add(map);
-    	    c.moveToNext();
-    	}
-    	c.close();
-    	dbr.close();
 		
-		return conversationList;
+		return c;
     }
     
-    public ArrayList<HashMap<String, String>> getMessages(String id){
+    public ArrayList<HashMap<String, String>> getMessagesData(int id){
     	
     	ArrayList<HashMap<String, String>> conversationList = new ArrayList<HashMap<String, String>>();
         
 		// Get the entries
-        SQLiteDatabase dbr = getReadableDatabase();
     	String[] projection = {
     	    ChatMessage._ID,
     	    ChatMessage.COLUMN_NAME_AUTHOR,
@@ -329,11 +326,11 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     	    ChatMessage.COLUMN_NAME_CREATED_AT,
     	    };
     	
-    	Cursor c = dbr.query(
+    	Cursor c = database.query(
     		    ChatMessage.TABLE_NAME,  // The table to query
     		    projection,                               // The columns to return
     		    ChatMessage.COLUMN_NAME_CHAT_ID+" = ?",                                // The columns for the WHERE clause
-    		    new String[] {id},                            // The values for the WHERE clause
+    		    new String[] {id+""},                            // The values for the WHERE clause
     		    null,                                     // don't group the rows
     		    null,                                     // don't filter by row groups
     		    null                                 // The sort order
@@ -352,21 +349,42 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     	    c.moveToNext();
     	}
     	c.close();
-    	dbr.close();
 		
 		return conversationList;
     }
      
+    
+    public Cursor getMessages(int id){
 
-    public int setAsRead(String conversationId, boolean read){
-    	SQLiteDatabase dbw = getWritableDatabase();
+		// Get the entries
+    	String[] projection = {
+    	    ChatMessage._ID,
+    	    ChatMessage.COLUMN_NAME_AUTHOR,
+    	    ChatMessage.COLUMN_NAME_BODY,
+    	    ChatMessage.COLUMN_NAME_CREATED_AT,
+    	    };
+    	
+    	Cursor c = database.query(
+    		    ChatMessage.TABLE_NAME,  // The table to query
+    		    projection,                               // The columns to return
+    		    ChatMessage.COLUMN_NAME_CHAT_ID+" = ?",                                // The columns for the WHERE clause
+    		    new String[] {id+""},                            // The values for the WHERE clause
+    		    null,                                     // don't group the rows
+    		    null,                                     // don't filter by row groups
+    		    null                                 // The sort order
+    		    );
+    	
+		
+		return c;
+    }
+
+    public boolean setAsRead(int conversationId, boolean read){
     	
     	ContentValues values = new ContentValues();
     	values.put(Chat.COLUMN_NAME_NEW_MESSAGES, read?"0":"1");
     	
-    	int affectedRows = dbw.update(Chat.TABLE_NAME, values, Chat._ID+" = ? AND "+Chat.COLUMN_NAME_NEW_MESSAGES+" = ?", new String[] {conversationId, read?"1":"0"});
-    	
-    	dbw.close();
-    	return affectedRows;
+    	return database.update(Chat.TABLE_NAME, values, Chat._ID+" = ? AND "+Chat.COLUMN_NAME_NEW_MESSAGES+" = ?", new String[] {conversationId+"", read?"1":"0"})>0;
     }
+    
+
 }

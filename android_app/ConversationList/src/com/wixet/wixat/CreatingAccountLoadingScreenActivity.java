@@ -1,6 +1,5 @@
 package com.wixet.wixat;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.Key;
 
@@ -18,14 +17,12 @@ import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.util.Log;
-
 import com.wixet.utils.Encryption;
+import com.wixet.utils.ServerConfiguration;
 
 
 public class CreatingAccountLoadingScreenActivity extends Activity {
 
-	private static String SERVER_URL = "http://46.137.8.44:9090/plugins/wixat/create";
 
 	
 	private class CreateAccount extends AsyncTask<Intent, Integer, Long> {
@@ -41,8 +38,8 @@ public class CreatingAccountLoadingScreenActivity extends Activity {
 			    
 				try {
 					
-					Key sharedKey = new SecretKeySpec(Encryption.decode(LoadingScreenActivity.KEY), "DESede");
-					String url = SERVER_URL+"?phone="+Encryption.encrypt(sharedKey, telephone)+"&password="+Encryption.encrypt(sharedKey, password)+"&secret="+LoadingScreenActivity.SECRET;
+					Key sharedKey = new SecretKeySpec(Encryption.decode(ServerConfiguration.KEY), "DESede");
+					String url = ServerConfiguration.CREATE_URL+"?phone="+Encryption.encrypt(sharedKey, telephone)+"&password="+Encryption.encrypt(sharedKey, password)+"&secret="+ServerConfiguration.SECRET;
 					response = httpclient.execute(new HttpGet(url));
 					StatusLine statusLine = response.getStatusLine();
 					

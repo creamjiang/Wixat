@@ -24,8 +24,8 @@ public class ContactObserver extends ContentObserver {
 	@Override
     public void onChange(boolean selfChange) {
         super.onChange(selfChange);
-        Log.d("CAMBIO","Algo de un contacto ha cambiado");
-        context.updatedDataSet();
+       // Log.d("CAMBIO","Algo de un contacto ha cambiado");
+//        context.updatedDataSet();
     }
 
 

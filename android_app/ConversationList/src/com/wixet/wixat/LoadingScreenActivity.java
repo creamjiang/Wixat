@@ -20,16 +20,14 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.wixet.utils.Encryption;
+import com.wixet.utils.ServerConfiguration;
 
 
 public class LoadingScreenActivity extends Activity {
 
-	public static String SERVER_URL = "http://46.137.8.44:9090/plugins/wixat/check";
-	public static String SECRET = "4qdA13os";
-	public static String KEY = "AV7LPkDZUUCwtQ49ID1YGY+Ga7+1dfud";
-	public static String TELEPHONE = "telephone";
-	public static String ERROR = "error";
-	public static String FIRST_TIME = "firstTime";
+	public static final String TELEPHONE = "telephone";
+	public static final String ERROR = "error";
+	public static final String FIRST_TIME = "firstTime";
 	
 	private class CheckUser extends AsyncTask<Intent, Integer, Long> {
 			@Override
@@ -42,8 +40,8 @@ public class LoadingScreenActivity extends Activity {
 
 				try {
 					
-					Key sharedKey = new SecretKeySpec(Encryption.decode(KEY), "DESede");
-					String url = SERVER_URL+"?phone="+Encryption.encrypt(sharedKey, telephone)+"&secret="+SECRET;
+					Key sharedKey = new SecretKeySpec(Encryption.decode(ServerConfiguration.KEY), "DESede");
+					String url = ServerConfiguration.CHECK_URL +"?phone="+Encryption.encrypt(sharedKey, telephone)+"&secret="+ServerConfiguration.SECRET;
 					response = httpclient.execute(new HttpGet(url));
 					StatusLine statusLine = response.getStatusLine();
 					

@@ -6,16 +6,19 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 
+import android.content.ComponentName;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
-import android.os.RemoteException;
 import android.provider.BaseColumns;
 import android.provider.ContactsContract;
 import android.support.v4.app.DialogFragment;
@@ -27,16 +30,17 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.markupartist.android.widget.ActionBar;
 import com.markupartist.android.widget.ActionBar.Action;
 import com.markupartist.android.widget.ActionBar.DialogAction;
-import com.philippheckel.service.ServiceManager;
+import com.wixet.utils.ServerConfiguration;
 import com.wixet.wixat.adapter.ConversationArrayAdapter;
-import com.wixet.wixat.database.Chat;
 import com.wixet.wixat.database.ChatMessage;
 import com.wixet.wixat.database.DataBaseHelper;
-import com.wixet.wixat.service.SomeService1;
+import com.wixet.wixat.service.WixatService;
+import com.wixet.wixat.service.WixatService.LocalBinder;
 import com.wixet.wixat.service.XMPPManager;
 
 public class ConversationActivity extends FragmentActivity {
@@ -50,16 +54,17 @@ public class ConversationActivity extends FragmentActivity {
 	//private ArrayAdapter<String> adapter;
 	private ActionBar actionBar;
 	
-	private static String conversationId = null;
+	private static int conversationId;
 	private ListView list;
     private static ConversationArrayAdapter adapter;
-    private static ServiceManager service; 
+    private static WixatService service; 
     private EditText userInput;
     private DataBaseHelper db;
     private static String me = null;
     private static SharedPreferences settings;
     private static String participantDisplayName = null;
     private static String participant = null;
+    private boolean mBound;
     private static Handler messageHandler = new Handler() {
     	@Override
         public void handleMessage(Message msg) {
@@ -67,26 +72,24 @@ public class ConversationActivity extends FragmentActivity {
     		if(msg.what == XMPPManager.EVENT_NEW_MESSAGE){
     			org.jivesoftware.smack.packet.Message message = (org.jivesoftware.smack.packet.Message) msg.obj;
     			String from = message.getFrom().split("/")[0];
-    			if(participant.equals(from)){
+    			//if(participant.equals(from)){
 	        		HashMap <String,String> map = new HashMap <String,String>();
 	        		
 	        		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US); 
 	            	Date date = new Date();
 	            	
-	            	map.put(ChatMessage._ID, conversationId);
-	        		map.put(ChatMessage.COLUMN_NAME_AUTHOR, message.getFrom().split("@")[0]);
+	            	map.put(ChatMessage._ID, conversationId+"");
+	        		map.put(ChatMessage.COLUMN_NAME_AUTHOR, from);
 	        		map.put(ChatMessage.COLUMN_NAME_BODY, message.getBody());
 	        		map.put(ChatMessage.COLUMN_NAME_CREATED_AT, dateFormat.format(date));
 	        		
 	        		adapter.add(map);
-    			}else{
+    			/*}else{
     				//Not for me, say to the service shoNotification
     				try {
-						service.send(Message.obtain(null, XMPPManager.EVENT_NEW_MESSAGE, msg.arg1, 0));
+    					//TODO check that shit
+						//service.send(Message.obtain(null, XMPPManager.EVENT_NEW_MESSAGE, msg.arg1, 0));
 					} catch (NumberFormatException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (RemoteException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
@@ -95,19 +98,41 @@ public class ConversationActivity extends FragmentActivity {
     	    		editor.putString(FORCE_LOAD_DATASET, from);
     	    		editor.putString(VALUE, "1");
     	    		editor.commit();
-    			}
+    			}*/
     		}
 
         }
     };
 	
+    
+    private ServiceConnection mConnection = new ServiceConnection() {
+    	
+    	
+    	
+        @Override
+        public void onServiceConnected(ComponentName className,
+                IBinder localService) {
+
+            LocalBinder binder = (LocalBinder) localService;
+            service = binder.getService();
+            mBound = true;
+            service.setHandler(WixatService.TYPE_CONVERSATION, messageHandler);
+
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
+    
     /* Para cuando se pulsa a enviar */
     EditText.OnEditorActionListener exampleListener = new EditText.OnEditorActionListener(){
 
 		@Override
 	    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 	        boolean handled = false;
-	        Log.d("ESTO",actionId+"");
 	        if (actionId == EditorInfo.IME_ACTION_SEND) {
 	            // Send the user message
 	            handled = true;
@@ -125,10 +150,13 @@ public class ConversationActivity extends FragmentActivity {
         
         /* Cargar telefono del dueño y demás datos*/
         settings = getSharedPreferences(ConversationList.CONFIGURATION, 0);
-        me = settings.getString(ConversationList.TELEPHONE, null);
+        me = settings.getString(ConversationList.TELEPHONE, null) +"@"+ServerConfiguration.HOSTNAME;
         
-        conversationId = getIntent().getExtras().getString(CONVERSATION_ID);
-        String forceLoad = getIntent().getExtras().getString(FORCE_LOAD_DATASET);
+        conversationId = getIntent().getExtras().getInt(CONVERSATION_ID);
+        
+        Log.d("Conversation","ID: "+conversationId);
+        
+        
 
         
 
@@ -142,28 +170,18 @@ public class ConversationActivity extends FragmentActivity {
         
         final Action menuAction = new DialogAction(this, showMenu(), R.drawable.ic_title_menu_default);
         actionBar.addAction(menuAction);
+
         
-
-
-        /* Servicio para manejar los mensajes entrantes y salientes */
-        this.service = new ServiceManager(this, SomeService1.class, messageHandler);
-        service.start();
+        
+        
         db = new DataBaseHelper(this);
+
         
-        
-        HashMap<String,String> conversation = db.getConversation(conversationId);
-        
+        /* Get the participant display name */
         // Load contact name and thumbnail (de momento no se usa el thumbnail)
-        participant = conversation.get(Chat.COLUMN_NAME_PARTICIPANT);
+        participant = db.getParticipant(conversationId);
         
-        if(forceLoad != null){
-        	//Activity initiated from notification
-    		SharedPreferences.Editor editor = settings.edit();
-    		editor.putString(FORCE_LOAD_DATASET, participant);
-    		editor.commit();
-        }
-        
-        participantDisplayName = conversation.get(Chat.COLUMN_NAME_PARTICIPANT).split("@")[0];
+        participantDisplayName = participant.split("@")[0];
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode( participantDisplayName));
         ContentResolver contentResolver = getContentResolver();
         Cursor contactLookup = contentResolver.query(uri, new String[] {BaseColumns._ID,
@@ -184,18 +202,15 @@ public class ConversationActivity extends FragmentActivity {
                 contactLookup.close();
             }
         
-        actionBar.setTitle("Conversation with "+participantDisplayName);
+        /****************************************************/
+        actionBar.setTitle(participantDisplayName);
 		list=(ListView)findViewById(R.id.conversation);
 		
 		// Getting adapter by passing xml data ArrayList
-        adapter=new ConversationArrayAdapter(this, R.layout.conversation_row_left ,db.getMessages(conversationId), me);
+		adapter=new ConversationArrayAdapter(this, db.getMessagesData(conversationId), participant);
+		
+        //adapter=new ConversationCursorAdapter(this, R.layout.conversation_row_left ,db.getMessages(conversationId), me);
         list.setAdapter(adapter);
-        
-        if(db.setAsRead(conversationId, true) > 0){
-        	//Before unread, now is read. Update conversationList
-        	Intent returnIntent = new Intent();
-        	setResult(RESULT_OK,returnIntent);     
-        }
 
         
         
@@ -214,30 +229,42 @@ public class ConversationActivity extends FragmentActivity {
     	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US); 
     	Date date = new Date();
     	String text = userInput.getText()+"";
-    	map.put(ChatMessage._ID, conversationId);
+    	map.put(ChatMessage._ID, conversationId+"");
 		map.put(ChatMessage.COLUMN_NAME_AUTHOR, me);
 		map.put(ChatMessage.COLUMN_NAME_BODY, text);
 		map.put(ChatMessage.COLUMN_NAME_CREATED_AT, dateFormat.format(date));
-		String[] data  = {participant,text};
-		try {
-			service.send(Message.obtain(null, XMPPManager.COMMAND_SEND_MESSAGE, data));
-			db.insertMessage(conversationId, me, text);
-		} catch (RemoteException e) {
-			e.printStackTrace();
+		
+		if(service.sendMessage(me, participant, text)){
+			userInput.setText("");
+			adapter.add(map);
+		}else{
+            Toast.makeText(getApplicationContext(),
+            		getApplicationContext().getText(R.string.notice_not_connected),
+                    Toast.LENGTH_SHORT).show();
 		}
-		userInput.setText("");
-		
-		
-		adapter.add(map);
     }
     
     
 	@Override
 	protected void onStop() {
-	  service.unbind();
-  
-
-	  super.onStop();
+	       super.onStop();
+			// Unbind from the service
+	        if (mBound) {
+	        	//mServicio.unsetHandler();
+	        	service.unsetHandler(WixatService.TYPE_CONVERSATION);
+	            unbindService(mConnection);
+	            mBound = false;
+	        }
+	        db.close();
 	}
+	
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Bind to LocalService
+        Intent intent = new Intent(this, WixatService.class);
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        
+    }
 
 }
