@@ -48,6 +48,16 @@ import java.security.Key;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
+
+import org.jivesoftware.openfire.interceptor.InterceptorManager;
+import org.jivesoftware.openfire.interceptor.PacketInterceptor;
+import org.jivesoftware.openfire.interceptor.PacketRejectedException;
+import org.jivesoftware.openfire.session.Session;
+import org.xmpp.packet.Message;
+import org.jivesoftware.openfire.MessageRouter;
+import org.xmpp.packet.PacketExtension;
+import org.dom4j.Element;
+
 /**
  * Plugin that includes a servlet that provides information about users' and components'
  * presence in the server. For security reasons, the XMPP spec does not allow anyone to see
@@ -66,8 +76,15 @@ import javax.crypto.spec.SecretKeySpec;
  *
  * @author Gaston Dombiak
  */
-public class WixatPlugin implements Plugin, Component {
+public class WixatPlugin implements Plugin, Component, PacketInterceptor {
 
+
+	private static final String EXTENSION_NAME = "confirmation";
+	private static final String EXTENSION_NAMESPACE = "jabber:confirmation";
+	private static final String SERVER = "server";
+	private static final String TYPE = "type";
+	private static final String PACKET_ID = "packet_id";
+    ////////////////////
 	private UserManager userManager;
 	private PluginManager pluginManager;
 	
@@ -77,12 +94,23 @@ public class WixatPlugin implements Plugin, Component {
     private boolean enabled;
     private String cryptoKey;
     
+        
+	private MessageRouter messageRouter;
+	private InterceptorManager interceptorManager;
     
 
     public void initializePlugin(PluginManager manager, File pluginDirectory) {
 		pluginManager = manager;
         server = XMPPServer.getInstance();
         userManager = server.getUserManager();
+        
+		/**/
+		interceptorManager = InterceptorManager.getInstance();
+		messageRouter = server.getMessageRouter();
+		interceptorManager.addInterceptor(this);
+				
+		/**/
+
 
         secret = JiveGlobals.getProperty("plugin.wixat.secret", "");
         // If no secret key has been assigned to the user service yet, assign a random one.
@@ -121,6 +149,7 @@ public class WixatPlugin implements Plugin, Component {
         userManager = null;
         // Stop listening to system property events
         //PropertyEventDispatcher.removeListener(this);
+        interceptorManager.removeInterceptor(this);
     }
 
 	
@@ -324,4 +353,30 @@ public class WixatPlugin implements Plugin, Component {
             }
         }*/
     }
+    
+    
+    /* Confirm packet received to the client */
+
+
+
+        		
+ 
+	
+
+	/* Send a response to client notifying message received by server */
+    public void interceptPacket(Packet packet, Session session, boolean read, boolean processed) throws PacketRejectedException {
+		if(processed && read && packet instanceof Message && ((Message) packet).getBody() != null){
+			
+		        Message confirmation = new Message();
+		        PacketExtension ext = new PacketExtension(EXTENSION_NAME,EXTENSION_NAMESPACE);
+		        Element e = ext.getElement();
+		        e.addElement(TYPE).setText(SERVER);
+		        e.addElement(PACKET_ID).setText(packet.getID());
+		        confirmation.addExtension(ext);
+				confirmation.setFrom(packet.getTo());
+				confirmation.setTo(packet.getFrom());
+				messageRouter.route(confirmation);
+		}
+				
+	}
 }
