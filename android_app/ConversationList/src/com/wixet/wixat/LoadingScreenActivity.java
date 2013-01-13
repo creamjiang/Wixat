@@ -17,8 +17,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
-import android.util.Log;
-
 import com.wixet.utils.Encryption;
 import com.wixet.utils.ServerConfiguration;
 
@@ -50,7 +48,6 @@ public class LoadingScreenActivity extends Activity {
 				        response.getEntity().writeTo(out);
 				        out.close();
 				        String responseString = out.toString().trim();
-				        Log.d("NUMBER",responseString);
 				        Intent inew;
 				        if(responseString.equals("true")){
 				        	//Number already exists

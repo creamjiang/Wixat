@@ -4,11 +4,10 @@ import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 
-import android.os.AsyncTask;
-import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
-import android.util.Log;
+import android.os.AsyncTask;
+import android.os.Bundle;
 
 
 public class FirstTimeWritePasswordLoadingActivity extends Activity {
@@ -36,6 +35,7 @@ public class FirstTimeWritePasswordLoadingActivity extends Activity {
 							connection.login(username, password);
 							setResult(RESULT_OK,i);
 							connection.disconnect();
+							//Log.d("DESCONECTADO","VOLVER A INICIAR");
 						} catch (XMPPException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -46,7 +46,7 @@ public class FirstTimeWritePasswordLoadingActivity extends Activity {
 						
 						
 						
-						finish();
+						finish(); 
 				
 			    
 				return null;
@@ -58,7 +58,6 @@ public class FirstTimeWritePasswordLoadingActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Log.d("LOGIN","PROBANDO");
 		setContentView(R.layout.activity_loading_screen);
 		Intent i = getIntent();
 		new CheckUser().execute(i);

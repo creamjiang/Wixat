@@ -5,7 +5,9 @@
     android:background="@drawable/green_bubble"
     android:orientation="horizontal"
     android:padding="5dip" >
-
+
+
+
         
 		<!-- Person name-->
 	    <TextView
@@ -15,7 +17,7 @@
 	        android:text=""
 	        android:textColor="#040404"
 	        android:typeface="sans" 
-	        android:textSize="12dip"
+	        android:textSize="12sp"
 	        android:paddingLeft="15dip"
 	        android:textStyle="bold"/>
 	
@@ -26,7 +28,7 @@
 	        android:layout_height="wrap_content"
 	        android:layout_below="@id/name"
 	        android:textColor="#343434"
-	        android:textSize="10dip"
+	        android:textSize="10sp"
 	        android:paddingLeft="15dip"
 	        android:layout_marginTop="1dip"
 	        android:text="" />
@@ -41,9 +43,18 @@
 	        android:gravity="right"
 	        android:text=""
 	        android:layout_marginRight="10dip"
-	        android:textSize="10dip"
+	        android:textSize="10sp"
 	        android:textColor="#10bcc9"
 	        android:textStyle="bold"/>
-      
+
+	    <ImageView
+	        android:id="@+id/message_state"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_alignTop="@+id/time"
+	        android:layout_toLeftOf="@+id/time"
+	        android:contentDescription="@string/message_state"
+	        android:paddingRight="10dp"
+	        android:src="@drawable/glyphicons_054_clock" />
 
 </RelativeLayout>

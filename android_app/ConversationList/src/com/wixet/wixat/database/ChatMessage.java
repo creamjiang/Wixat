@@ -7,6 +7,8 @@ public class ChatMessage implements BaseColumns {
     public static final String COLUMN_NAME_AUTHOR = "author";
     public static final String COLUMN_NAME_CHAT_ID = "chat_id";
     public static final String COLUMN_NAME_BODY = "body";
+    public static final String COLUMN_NAME_SENT = "sent";
+    public static final String COLUMN_NAME_CONFIRMED = "confirmed";
     public static final String COLUMN_NAME_CREATED_AT = "created_at";
     
     

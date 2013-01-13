@@ -1,24 +1,16 @@
 package com.wixet.wixat.adapter;
 
-import java.util.HashMap;
-
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Typeface;
-import android.net.Uri;
-import android.provider.BaseColumns;
-import android.provider.ContactsContract;
 import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.wixet.wixat.R;
-import com.wixet.wixat.database.Chat;
 import com.wixet.wixat.database.ChatMessage;
 
 public class ConversationCursorAdapter extends CursorAdapter{

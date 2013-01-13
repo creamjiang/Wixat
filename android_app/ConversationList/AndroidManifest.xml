@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.wixet.wixat"
-    android:versionCode="2"
-    android:versionName="1.0" >
+    android:versionCode="5"
+    android:versionName="2.10" >
 
     <uses-permission android:name="android.permission.INTERNET" >
     </uses-permission>
     <uses-permission android:name="android.permission.READ_PHONE_STATE" >
     </uses-permission>
     <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.CALL_PHONE"/>
 
     <uses-sdk
         android:minSdkVersion="7"
@@ -24,15 +26,6 @@
         <activity
             android:name="com.wixet.wixat.ConversationList"
             android:label="@string/title_activity_converstaion_list" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name="com.wixet.wixat.NewNodeActivity"
-            android:label="@string/title_activity_new_node" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

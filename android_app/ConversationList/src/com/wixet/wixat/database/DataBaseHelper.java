@@ -6,16 +6,19 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 
+import org.jivesoftware.smack.packet.Message;
+
+import com.wixet.wixat.service.XMPPManager;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 public class DataBaseHelper extends SQLiteOpenHelper {
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 4;
     public static final String DATABASE_NAME = "WixatMessenger.db";
     private static final String TEXT_TYPE = " TEXT";
     private static final String VARCHAR_TYPE = " VARCHAR(50)";
@@ -26,7 +29,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     private static final String UNIQUE = " UNIQUE";
     private SQLiteDatabase database;
 
-    
+    private final String PENDING_QUEUE_QUERY = "SELECT a."+PendingQueue._ID+" as "+PendingQueue._ID+", b."+ChatMessage.COLUMN_NAME_AUTHOR+" as "+ChatMessage.COLUMN_NAME_AUTHOR+", c."+Chat.COLUMN_NAME_PARTICIPANT+" as "+Chat.COLUMN_NAME_PARTICIPANT+", b."+ChatMessage.COLUMN_NAME_BODY+" as "+ChatMessage.COLUMN_NAME_BODY+" FROM "+PendingQueue.TABLE_NAME+" a INNER JOIN "+ChatMessage.TABLE_NAME+" b ON a."+PendingQueue._ID+"=b."+ChatMessage._ID+" INNER JOIN "+Chat.TABLE_NAME+" c ON b."+ChatMessage.COLUMN_NAME_CHAT_ID+"= c."+Chat._ID;
     
     public static final String SQL_CREATE_NODE =     
     		"CREATE TABLE " + Node.TABLE_NAME + " (" +
@@ -45,15 +48,28 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     	    //" FOREIGN KEY ("+ Chat.COLUMN_NAME_NODE_ID +") REFERENCES "+Node.TABLE_NAME+" ("+Node._ID+")" +
     	    " )";
     
+    public static final String SQL_PENDING_QUEUE_CHAT =     
+    		"CREATE TABLE " + PendingQueue.TABLE_NAME + " (" +
+    		PendingQueue._ID + TEXT_TYPE + " PRIMARY KEY " + COMMA_SEP +
+    	    " FOREIGN KEY ("+ PendingQueue._ID +") REFERENCES "+ChatMessage.TABLE_NAME+" ("+ChatMessage._ID+") ON DELETE CASCADE" +
+    	    " )";
+    
     public static final String SQL_CREATE_CHAT_MESSAGE =     
     		"CREATE TABLE " + ChatMessage.TABLE_NAME + " (" +
-    		ChatMessage._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + COMMA_SEP +
+    		//ChatMessage._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + COMMA_SEP +
+    		ChatMessage._ID + TEXT_TYPE + " PRIMARY KEY " + COMMA_SEP +
     		ChatMessage.COLUMN_NAME_AUTHOR + VARCHAR_TYPE + COMMA_SEP +
     		ChatMessage.COLUMN_NAME_CHAT_ID + INTEGER_TYPE + COMMA_SEP +
     		ChatMessage.COLUMN_NAME_BODY + TEXT_TYPE + COMMA_SEP +
+    		ChatMessage.COLUMN_NAME_SENT + BOOLEAN_TYPE + COMMA_SEP +
+    		ChatMessage.COLUMN_NAME_CONFIRMED + BOOLEAN_TYPE + COMMA_SEP +
     		ChatMessage.COLUMN_NAME_CREATED_AT + DATETIME_TYPE + COMMA_SEP +
     	    " FOREIGN KEY ("+ ChatMessage.COLUMN_NAME_CHAT_ID +") REFERENCES "+ Chat.TABLE_NAME+" ("+Chat._ID+")" +
     	    " )";
+    
+    
+    
+    
     
     public static final String SQL_CHAT_MESSAGE_INDEX = "CREATE INDEX chat_message_date_idx ON "+ ChatMessage.TABLE_NAME+"("+ ChatMessage._ID +")";
     
@@ -92,6 +108,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_CHAT);
         db.execSQL(SQL_CREATE_CHAT_MESSAGE);
         db.execSQL(SQL_INSERT_NODE);
+        db.execSQL(SQL_PENDING_QUEUE_CHAT);
         
 
     }
@@ -99,7 +116,13 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         // This database is only a cache for online data, so its upgrade policy is
         // to simply to discard the data and start over
         //db.execSQL(SQL_DELETE_ENTRIES);
-        onCreate(db);
+    	if(oldVersion == 1 || oldVersion == 2 || oldVersion == 3){
+    		db.execSQL("DROP TABLE "+ChatMessage.TABLE_NAME+";");
+    		db.execSQL(SQL_CREATE_CHAT_MESSAGE);
+    		db.execSQL(SQL_PENDING_QUEUE_CHAT);
+    	}
+    	//Log.d("UPGRADE","DATABASE");
+        //onCreate(db);
     }
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         onUpgrade(db, oldVersion, newVersion);
@@ -115,6 +138,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     	database.insert( Node.TABLE_NAME, null, values);
     }
     
+
     public boolean existsChat(String participant){
 
     	/* Se podría utilizar count(*) de sql pero como sólo hay un resultado o 0 pues así es más sencillo */
@@ -144,7 +168,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     	
     }
     
-    public void insertMessage(int conversationId, String author, String text ){
+    public void insertMessage(int conversationId, String author, String text, String packetId ){
     	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US); 
     	Date date = new Date();
     	ContentValues values = new ContentValues();
@@ -152,6 +176,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     	values.put(ChatMessage.COLUMN_NAME_AUTHOR, author);
     	values.put(ChatMessage.COLUMN_NAME_BODY, text);
     	values.put(ChatMessage.COLUMN_NAME_CREATED_AT, dateFormat.format(date));
+    	values.put(ChatMessage._ID, packetId);
     	database.insert( ChatMessage.TABLE_NAME, null, values);
     	
     }
@@ -292,7 +317,6 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     
     
     public Cursor getConversations(){
-        
 		// Get the entries
     	String[] projection = {
     	    Chat._ID,
@@ -323,6 +347,8 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     	    ChatMessage._ID,
     	    ChatMessage.COLUMN_NAME_AUTHOR,
     	    ChatMessage.COLUMN_NAME_BODY,
+    	    ChatMessage.COLUMN_NAME_CONFIRMED,
+    	    ChatMessage.COLUMN_NAME_SENT,
     	    ChatMessage.COLUMN_NAME_CREATED_AT,
     	    };
     	
@@ -343,8 +369,10 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     		map.put(ChatMessage._ID, c.getString(c.getColumnIndexOrThrow(ChatMessage._ID)));
     		map.put(ChatMessage.COLUMN_NAME_AUTHOR, c.getString(c.getColumnIndexOrThrow(ChatMessage.COLUMN_NAME_AUTHOR)));
     		map.put(ChatMessage.COLUMN_NAME_BODY, c.getString(c.getColumnIndexOrThrow(ChatMessage.COLUMN_NAME_BODY)));
+    		map.put(ChatMessage.COLUMN_NAME_CONFIRMED, c.getString(c.getColumnIndexOrThrow(ChatMessage.COLUMN_NAME_CONFIRMED)));
+    		map.put(ChatMessage.COLUMN_NAME_SENT, c.getString(c.getColumnIndexOrThrow(ChatMessage.COLUMN_NAME_SENT)));
     		map.put(ChatMessage.COLUMN_NAME_CREATED_AT, c.getString(c.getColumnIndexOrThrow(ChatMessage.COLUMN_NAME_CREATED_AT)));
-    	    
+
     	    conversationList.add(map);
     	    c.moveToNext();
     	}
@@ -361,6 +389,8 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     	    ChatMessage._ID,
     	    ChatMessage.COLUMN_NAME_AUTHOR,
     	    ChatMessage.COLUMN_NAME_BODY,
+    	    ChatMessage.COLUMN_NAME_CONFIRMED,
+    	    ChatMessage.COLUMN_NAME_SENT,
     	    ChatMessage.COLUMN_NAME_CREATED_AT,
     	    };
     	
@@ -385,6 +415,59 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     	
     	return database.update(Chat.TABLE_NAME, values, Chat._ID+" = ? AND "+Chat.COLUMN_NAME_NEW_MESSAGES+" = ?", new String[] {conversationId+"", read?"1":"0"})>0;
     }
+
+	public boolean updateMessageState(String packetId, int event_type) {
+    	ContentValues values = new ContentValues();
+    	
+		if(event_type == XMPPManager.EVENT_MESSAGE_SENT){
+			values.put(ChatMessage.COLUMN_NAME_SENT, "1");
+		}else if(event_type == XMPPManager.EVENT_MESSAGE_CONFIRMED){
+			values.put(ChatMessage.COLUMN_NAME_CONFIRMED, "1");
+		}
+		
+		return database.update(ChatMessage.TABLE_NAME, values, Chat._ID+" = ?", new String[] {packetId}) > 0;
+		
+	}
+
+	public void addToPendingQueue(Message m) {
+		ContentValues values = new ContentValues();
+    	values.put(PendingQueue._ID, m.getPacketID());
+    	database.insert( PendingQueue.TABLE_NAME, null, values);
+		
+	}
+
+	public ArrayList<Message> getPendingQueue() {
+		
+		ArrayList<Message> al = new ArrayList<Message>();
+		
+		Cursor c = database.rawQuery(PENDING_QUEUE_QUERY, null);
+		c.moveToFirst();
+    	while (c.isAfterLast() == false) 
+    	{
+    		
+    		
+    		Message m = new Message(); 
+    		m.setPacketID(c.getString(c.getColumnIndexOrThrow(PendingQueue._ID)));
+    		m.setFrom(c.getString(c.getColumnIndexOrThrow(ChatMessage.COLUMN_NAME_AUTHOR)));
+    		m.setTo(c.getString(c.getColumnIndexOrThrow(Chat.COLUMN_NAME_PARTICIPANT)));
+    		m.setBody(c.getString(c.getColumnIndexOrThrow(ChatMessage.COLUMN_NAME_BODY)));
+    		
+    		
+    	    al.add(m);
+    	    c.moveToNext();
+    	}
+    	c.close();
+		
+		return al;
+	}
+
+
+	public void pollFromPendingQueue(String value) {
+		database.delete(PendingQueue.TABLE_NAME, PendingQueue._ID+"= ?", new String[] {value});
+		
+	}
+
+
     
 
 }

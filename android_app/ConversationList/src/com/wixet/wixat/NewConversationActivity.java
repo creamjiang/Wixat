@@ -9,11 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
-import android.os.RemoteException;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -21,11 +17,9 @@ import android.widget.ListView;
 import com.wixet.utils.ServerConfiguration;
 import com.wixet.wixat.adapter.ContactListArrayAdapter;
 import com.wixet.wixat.service.WixatService;
-import com.wixet.wixat.service.XMPPManager;
 import com.wixet.wixat.service.WixatService.LocalBinder;
 
 
-//TODO REVISAR LA CLASE COMPLETA
 public class NewConversationActivity extends Activity {
  
 	private static WixatService service;

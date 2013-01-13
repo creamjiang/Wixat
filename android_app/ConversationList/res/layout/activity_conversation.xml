@@ -30,8 +30,8 @@
         android:layout_toLeftOf="@+id/sendButton"
         android:ems="10"
         android:hint="@string/blank"
-        android:inputType="text" 
-        android:imeOptions="actionSend">
+        android:imeOptions="actionSend"
+        android:inputType="text|textNoSuggestions" >
 
     </EditText>
     

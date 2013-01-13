@@ -4,8 +4,10 @@
     android:layout_height="wrap_content"
     android:background="@drawable/gray_bubble"
     android:orientation="horizontal"
-    android:padding="5dip" >
-
+	android:padding="5dip">
+
+
+
         
 		<!-- Person name-->
 	    <TextView
@@ -15,7 +17,7 @@
 	        android:text=""
 	        android:textColor="#040404"
 	        android:typeface="sans" 
-	        android:textSize="12dip"
+	        android:textSize="12sp"
 	        android:textStyle="bold"/>
 	
 		<!-- Text -->
@@ -25,7 +27,7 @@
 	        android:layout_height="wrap_content"
 	        android:layout_below="@id/name"
 	        android:textColor="#343434"
-	        android:textSize="10dip"
+	        android:textSize="10sp"
 	        android:layout_marginTop="1dip"
 	        android:text="" />
 	
@@ -39,7 +41,7 @@
 	        android:gravity="right"
 	        android:text=""
 	        android:layout_marginRight="10dip"
-	        android:textSize="10dip"
+	        android:textSize="10sp"
 	        android:textColor="#10bcc9"
 	        android:textStyle="bold"/>
       

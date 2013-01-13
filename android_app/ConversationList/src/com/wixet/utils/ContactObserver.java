@@ -1,8 +1,6 @@
 package com.wixet.utils;
 
 import android.database.ContentObserver;
-import android.util.Log;
-
 import com.wixet.wixat.ConversationList;
 
 

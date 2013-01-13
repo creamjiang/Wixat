@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<string-array name="conversationListOptions">
-	   <item>View contact</item>
 	   <item>Remove conversation</item>
 	   <item>Call contact</item>
 	</string-array>
@@ -9,12 +8,10 @@
 	<string-array name="conversationListMenu">
 	   <item>New conversation</item>
 	   <item>Manage nodes</item>
-	   <item>Search contact</item>
 	</string-array>
 	
 	<string-array name="conversationMenu">
-	   <item>View info</item>
-	   <item>Attach</item>
+	   <item>Call contact</item>
 	</string-array>
 
 	

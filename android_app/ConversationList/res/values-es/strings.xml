@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+
+    <string name="hello">Hello World!</string>
+    <string name="app_name">Wixat</string>
+    <string name="actionbar_activity_not_found">Failed to open intent</string>
+    <string name="default_hostname">wixet.com</string>
+    <string name="connect">Conectar</string>
+    <string name="node_host">Hostname</string>
+    <string name="node_list">Lista de nodos</string>
+    <string name="username">Usuario</string>
+    <string name="password">Contraseña</string>
+    <string name="menu_settings">Opciones</string>
+    <string name="title_activity_converstaion_list">Wixat</string>
+    <string name="title_activity_new_node">Nuevo nodo</string>
+    <string name="title_activity_node_login">Login</string>
+    <string name="cannot_connect_to_node">No se pudo conectar con el servidor</string>
+    <string name="invalid_user">El usuario o la contraseña es incorrecto, por favor revísalo</string>
+    <string name="back">Volver</string>
+    <string name="accept">Aceptar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="confirm_conversation_remove">¿Eliminar conversación?</string>
+    <string name="conversation_removed">Conversación eliminada</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_node_manager">NodeManagerActivity</string>
+    <string name="title_activity_foo">FooActivity</string>
+    <string name="title_activity_conversation">ConversationActivity</string>
+    <string name="send">Enviar</string>
+    <string name="blank"></string>
+    <string name="title_activity_contact_info">ContactInfoActivity</string>
+    <string name="contact_name">Perico</string>
+    <string name="default_node">wixet.com</string>
+    <string name="invite">Invitar</string>
+    <string name="call">Llamar</string>
+    <string name="local_service_started">Local service started</string>
+    <string name="local_service_label">Wixat</string>
+    <string name="local_service_stopped">Local service stopped</string>
+    <string name="local_service_connected">Local service connected</string>
+    <string name="local_service_disconnected">Local service disconnected</string>
+    <string name="title_activity_first_time">FirstTimeActivity</string>
+    <string name="phone_number">Tu número de teléfono es:</string>
+    <string name="continueString">Continuar</string>
+    <string name="cannot_connect_to_server">Tu número no puede ser verificado. Por favor asegúrate de estar conectado a internet</string>
+    <string name="title_activity_loading_screen">LoadingScreenActivity</string>
+    <string name="title_activity_first_time_ask">FirstTimeAskActivity</string>
+    <string name="no_number_desc">Tu número de teléfono no ha podido ser validado automáticamente, por favor escribe tu número.</string>
+    <string name="no_number_warning">Sólo se utilizará tu número para buscar a tus contactos, por lo tanto, si no escribes el correcto tus contactos no podrán encontrarte</string>
+    <string name="number_prefix">+34</string>
+    <string name="title_activity_first_time_write_password">FirstTimeWritePassword</string>
+    <string name="title_activity_first_time_create_account">FirstTimeCreateAccount</string>
+    <string name="first_time_password">Parece que este número ya está registrado. Por favor escribe tu contraseña</string>
+    <string name="first_time_create_account">Como es la primera vez que usas este número, por tu seguridad es necesario que escribas una contraseña. ¡Por favor no la olvides!</string>
+    <string name="password_again">Tu contraseña otra vez</string>
+    <string name="password_match_error">Las contraseñas no coinciden</string>
+    <string name="desc">Descripción</string>
+    <string name="title_activity_creating_account_loading_screen">CreatingAccountLoadingScreenActivity</string>
+    <string name="new_message">Nuevo mensaje</string>
+    <string name="title_activity_load_contacts">LoadContactsActivity</string>
+    <string name="title_activity_load_contacts_select">LoadContactsSelectActivity</string>
+    <string name="title_activity_first_time_write_password_loading">Cargando</string>
+    <string name="no_matches_found">Ninguno de tus contactos tiene una cuenta Wixat</string>
+    <string name="notice_not_connected">No se puede enviar el mensaje porque no hay conectividad de red</string>
+     <string name="message_state">Estado del mensaje</string>
+
+</resources>

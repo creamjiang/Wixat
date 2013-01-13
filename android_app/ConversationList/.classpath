@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
-	<classpathentry exported="true" kind="lib" path="/home/alvaro/workspace_android/asmack-2010.05.07.jar"/>
+	<classpathentry exported="true" kind="lib" path="/home/alvaro/Descargas/asmack/asmack/build/asmack-android-7.jar"/>
 	<classpathentry exported="true" kind="lib" path="/home/alvaro/workspace_android/jzlib.jar"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>

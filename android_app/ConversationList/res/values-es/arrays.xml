@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string-array name="conversationListOptions">
+	   <item>Eliminar conversación</item>
+	   <item>Llamar</item>
+	</string-array>
+	
+	<string-array name="conversationListMenu">
+	   <item>Nueva conversación</item>
+	   <item>Configurar nodos</item>
+	</string-array>
+	
+	<string-array name="conversationMenu">
+	   <item>Llamar</item>
+	</string-array>
+
+	
+	<string-array name="nodeMenu">
+	   <item>Nuevo nodo</item>
+	</string-array>
+
+
+   
+</resources>

@@ -5,14 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
 import com.markupartist.android.widget.ActionBar;
-import com.markupartist.android.widget.ActionBar.Action;
-import com.markupartist.android.widget.ActionBar.DialogAction;
 
 public class NodeManagerActivity extends FragmentActivity {
 
@@ -28,8 +25,8 @@ public class NodeManagerActivity extends FragmentActivity {
         //actionBar.setHomeAction(new IntentAction(this, createIntent(this), R.drawable.ic_title_home_demo));
         actionBar.setTitle(R.string.node_list);
 
-        final Action menuAction = new DialogAction(this, showMenu(), R.drawable.ic_title_menu_default);
-        actionBar.addAction(menuAction);
+        //final Action menuAction = new DialogAction(this, showMenu(), R.drawable.ic_title_menu_default);
+        //actionBar.addAction(menuAction);
         
         
         
@@ -54,12 +51,12 @@ public class NodeManagerActivity extends FragmentActivity {
 
     }
 
-
+/*
 
     private DialogFragment showMenu() {
   		DialogFragment nw = new NodeListMenuDialogFragment();
   		return nw;
     	//nw.show(getSupportFragmentManager(), "listDialogFragment");
-    }
+    }*/
 
 }

@@ -1,10 +1,5 @@
 package com.wixet.wixat.service;
 
-import com.wixet.wixat.ConversationActivity;
-import com.wixet.wixat.ConversationList;
-import com.wixet.wixat.R;
-import com.wixet.wixat.database.DataBaseHelper;
-
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -22,7 +17,10 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.provider.BaseColumns;
 import android.provider.ContactsContract;
-import android.util.Log;
+import com.wixet.wixat.ConversationActivity;
+import com.wixet.wixat.ConversationList;
+import com.wixet.wixat.R;
+import com.wixet.wixat.database.DataBaseHelper;
 
 
 public class WixatService extends Service{
@@ -45,6 +43,7 @@ public class WixatService extends Service{
     Messenger mMessenger;
     private DataBaseHelper db; 
     private NotificationManager mNotificationManager;
+    private String actualParticipant ="";
     
     
     /**
@@ -58,24 +57,31 @@ public class WixatService extends Service{
         }
     }
     
+    public XMPPManager getXMPPManager(){
+    	return t;
+    }
+    
 	@Override
     public void onCreate() {
+		//Log.d("SERVICIO","ONCREATE");
         super.onCreate();
-        
+         
 		
 		  SharedPreferences settings = getSharedPreferences(ConversationList.CONFIGURATION, 0);
 		  String username = settings.getString(ConversationList.TELEPHONE, null);
 		  String password = settings.getString(ConversationList.PASSWORD, null);
-		  
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		db = new DataBaseHelper(this);
 		t = new XMPPManager(this, username, password);
 		t.start();
+	
+
             
 	}
 	
-	@Override
+	@Override 
     public void onDestroy() {
+		//Log.d("SERVICIO","DESTROY");
 		db.close();
         super.onDestroy();
 	}
@@ -83,6 +89,7 @@ public class WixatService extends Service{
 	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
+		//Log.d("SERVICIO","ONSTART");
 		//Always active
 		return START_STICKY;
 	}
@@ -99,7 +106,7 @@ public class WixatService extends Service{
     
     public void showNotification(int conversationId){
         
-    	
+    	 
     	//Log.d("NOTIFICATION","FOR: "+conversationId);
     	
     	// Get display name
@@ -121,10 +128,11 @@ public class WixatService extends Service{
             
     	
     	final Notification notifyDetails = new Notification(R.drawable.ic_launcher,name,System.currentTimeMillis());
-
+    	//Add vibrate permissions if needed
     	long[] vibrate = {100,100,200,300};
     	notifyDetails.flags |= Notification.FLAG_AUTO_CANCEL;
     	notifyDetails.vibrate = vibrate;
+
     	notifyDetails.defaults =Notification.DEFAULT_ALL;
     	Context context = getApplicationContext();
     	
@@ -144,45 +152,7 @@ public class WixatService extends Service{
     	notifyDetails.setLatestEventInfo(context, contentTitle, contentText, intent);
 
     	mNotificationManager.notify(conversationId, notifyDetails);
-    	//notifyDetails.
-    	
-    	/*Intent notificationIntent = new Intent(this, ConversationActivity.class);
-    	notificationIntent.putExtra(ConversationActivity.CONVERSATION_ID, conversationId);
-    	notificationIntent.putExtra("MIERDA", "ESTOOO");
-    	notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    	
-    	// Get display name
-        String name = db.getParticipant(conversationId).split("@")[0];
-        Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode( name));
-        
 
-        // Load contact name and thumbnail
-        Cursor contactLookup = getContentResolver().query(uri, new String[] {BaseColumns._ID,
-                ContactsContract.PhoneLookup.DISPLAY_NAME }, null, null, null);
-        
-        
-            if (contactLookup != null && contactLookup.getCount() > 0) {
-                contactLookup.moveToNext();
-                name = contactLookup.getString(contactLookup.getColumnIndex(ContactsContract.Data.DISPLAY_NAME));
-                
-                contactLookup.close();
-            }
-            
-    	
-    	
-        Builder mNotifyBuilder = new NotificationCompat.Builder(this)
-            .setContentTitle(name)
-            .setContentText("Nuevos mensajes 2")
-            .setContentIntent(PendingIntent.getActivity(this, 0, notificationIntent, 0))
-            .setSmallIcon(R.drawable.stat_sample);
-
-            
-        	Notification notif = mNotifyBuilder.build();
-        	notif.flags |= Notification.FLAG_AUTO_CANCEL;
-            mNotificationManager.notify(
-                    conversationId,
-                    notif
-                    );*/
     }
     
     /* Return true if sent */
@@ -208,11 +178,29 @@ public class WixatService extends Service{
     	
     }
     
+    public void notifyMessageDeliver(String packetId, String participant, int event_type){
+    	//The message has been sent (confirmed by server response)
+    	
+    	/* Update the database */
+    	//Log.d("DELIVER","El paquete "+packetId+ " tpo:"+event_type);
+    	db.updateMessageState(packetId, event_type);
+    	
+    	
+    	if(bindedType == TYPE_CONVERSATION && actualParticipant.equals(participant)){
+    		try {
+				messenger.send(Message.obtain(null, event_type, 0, 0, packetId));
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    	}
+    	
+    }
     /* Return true if sent */
     public boolean notifyNewMessageReceived(int conversationId, org.jivesoftware.smack.packet.Message message){
     	
     	boolean sent = false;
-    	if(bindedType == TYPE_CONVERSATION){
+    	if(bindedType == TYPE_CONVERSATION && actualParticipant.equals(message.getFrom().split("/")[0])){
     		//Notify now
     		try {
 				messenger.send(Message.obtain(null, XMPPManager.EVENT_NEW_MESSAGE, 0, 0, message));
@@ -229,6 +217,10 @@ public class WixatService extends Service{
     	
     	return sent;
     	
+    }
+    
+    public void setActualParticipant(String participant){
+    	actualParticipant = participant;
     }
     
     public int startConversation(String jid){
@@ -255,13 +247,10 @@ public class WixatService extends Service{
     	}
     }
 	
-	public boolean sendMessage(String from, String to, String body){
-		if(t.send(to, body)){
-			db.insertMessage(db.getConversationId(to), from, body);
-			return true;
-		}else return false;
+	public boolean sendMessage(org.jivesoftware.smack.packet.Message m){
+		return t.send(m);
 	}
-	
+
 	public void removeConversation(int conversationId){
 		db.removeConversation(conversationId);
 	}

@@ -27,7 +27,6 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
-import android.util.Log;
 import android.view.Menu;
 
 import com.wixet.utils.Encryption;
@@ -120,14 +119,14 @@ public class LoadContactsActivity extends Activity {
 		    		setResult(RESULT_OK,i);
 		    	}
 			} catch (IOException e) {
-				Log.d("EXCEPTION","Error"+e.getMessage());
+				//Log.d("EXCEPTION","Error"+e.getMessage());
 				i.putExtra(MESSAGE, e.getMessage());
 				setResult(RESULT_CANCELED,i);
 			    
 				
 			} catch (Exception e) {
 				e.printStackTrace();
-				Log.d("ECEPTION","Exception");
+				//Log.d("ECEPTION","Exception");
 			} 
 			
         	

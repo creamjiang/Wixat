@@ -63,6 +63,7 @@
     <string name="title_activity_first_time_write_password_loading">Loading</string>
     <string name="no_matches_found">Ninguno de tus contactos tiene una cuenta Wixat</string>
     <string name="notice_not_connected">No se puede enviar el mensaje porque no hay conectividad de red</string>
+    <string name="message_state">Estado del mensaje</string>
     
 
 </resources>

@@ -23,7 +23,6 @@ import android.provider.BaseColumns;
 import android.provider.ContactsContract;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -46,9 +45,9 @@ import com.wixet.wixat.service.XMPPManager;
 public class ConversationActivity extends FragmentActivity {
 
 
-	public static final String VALUE = "value";
+	//public static final String VALUE = "value";
 	public static final String CONVERSATION_ID = "conversationId";
-	public static final String FORCE_LOAD_DATASET = "force";
+	//public static final String FORCE_LOAD_DATASET = "force";
 	Bitmap participantPhoto;
 
 	//private ArrayAdapter<String> adapter;
@@ -78,27 +77,18 @@ public class ConversationActivity extends FragmentActivity {
 	        		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US); 
 	            	Date date = new Date();
 	            	
-	            	map.put(ChatMessage._ID, conversationId+"");
+	            	map.put(ChatMessage._ID, message.getPacketID());
 	        		map.put(ChatMessage.COLUMN_NAME_AUTHOR, from);
 	        		map.put(ChatMessage.COLUMN_NAME_BODY, message.getBody());
 	        		map.put(ChatMessage.COLUMN_NAME_CREATED_AT, dateFormat.format(date));
 	        		
 	        		adapter.add(map);
-    			/*}else{
-    				//Not for me, say to the service shoNotification
-    				try {
-    					//TODO check that shit
-						//service.send(Message.obtain(null, XMPPManager.EVENT_NEW_MESSAGE, msg.arg1, 0));
-					} catch (NumberFormatException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-    				//Force update conversationList to view "new message"
-    				SharedPreferences.Editor editor = settings.edit();
-    	    		editor.putString(FORCE_LOAD_DATASET, from);
-    	    		editor.putString(VALUE, "1");
-    	    		editor.commit();
-    			}*/
+    		}else if(msg.what == XMPPManager.EVENT_MESSAGE_SENT){
+    			//The server has received the message
+    			adapter.setAsSent((String) msg.obj); 
+    		}else if(msg.what == XMPPManager.EVENT_MESSAGE_CONFIRMED){
+    			//The server has received the message
+    			adapter.setAsConfirmed((String) msg.obj); 
     		}
 
         }
@@ -117,6 +107,7 @@ public class ConversationActivity extends FragmentActivity {
             service = binder.getService();
             mBound = true;
             service.setHandler(WixatService.TYPE_CONVERSATION, messageHandler);
+        	service.setActualParticipant(participant);
 
 
         }
@@ -154,7 +145,6 @@ public class ConversationActivity extends FragmentActivity {
         
         conversationId = getIntent().getExtras().getInt(CONVERSATION_ID);
         
-        Log.d("Conversation","ID: "+conversationId);
         
         
 
@@ -166,14 +156,6 @@ public class ConversationActivity extends FragmentActivity {
         userInput.setOnEditorActionListener(exampleListener);
 
         
-
-        
-        final Action menuAction = new DialogAction(this, showMenu(), R.drawable.ic_title_menu_default);
-        actionBar.addAction(menuAction);
-
-        
-        
-        
         db = new DataBaseHelper(this);
 
         
@@ -181,16 +163,19 @@ public class ConversationActivity extends FragmentActivity {
         // Load contact name and thumbnail (de momento no se usa el thumbnail)
         participant = db.getParticipant(conversationId);
         
+        final Action menuAction = new DialogAction(this, showMenu(), R.drawable.ic_title_menu_default);
+        actionBar.addAction(menuAction);
+        
         participantDisplayName = participant.split("@")[0];
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode( participantDisplayName));
         ContentResolver contentResolver = getContentResolver();
         Cursor contactLookup = contentResolver.query(uri, new String[] {BaseColumns._ID,
                 ContactsContract.PhoneLookup.DISPLAY_NAME, ContactsContract.PhoneLookup.PHOTO_ID }, null, null, null);
         
-        
             if (contactLookup != null && contactLookup.getCount() > 0) {
                 contactLookup.moveToNext();
                 participantDisplayName = contactLookup.getString(contactLookup.getColumnIndex(ContactsContract.Data.DISPLAY_NAME));
+                
                 
                 int photoId = contactLookup.getInt(contactLookup.getColumnIndex(ContactsContract.PhoneLookup.PHOTO_ID));
                 if (photoId > 0) {
@@ -213,6 +198,9 @@ public class ConversationActivity extends FragmentActivity {
         list.setAdapter(adapter);
 
         
+        /********************************/
+
+
         
         
         
@@ -220,7 +208,10 @@ public class ConversationActivity extends FragmentActivity {
 
 
     private DialogFragment showMenu() {
-  		DialogFragment nw = new ConversationMenuDialogFragment();
+  		ConversationMenuDialogFragment nw = new ConversationMenuDialogFragment();
+  		nw.setPhone(participant.split("@")[0]);
+  		nw.setContentResolver(getContentResolver());
+  		
   		return nw;
     }
     
@@ -229,12 +220,16 @@ public class ConversationActivity extends FragmentActivity {
     	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US); 
     	Date date = new Date();
     	String text = userInput.getText()+"";
-    	map.put(ChatMessage._ID, conversationId+"");
+    	org.jivesoftware.smack.packet.Message m = new org.jivesoftware.smack.packet.Message();
+    	m.setBody(text);
+    	m.setTo(participant);
+    	m.setFrom(me);
+    	map.put(ChatMessage._ID, m.getPacketID());
 		map.put(ChatMessage.COLUMN_NAME_AUTHOR, me);
 		map.put(ChatMessage.COLUMN_NAME_BODY, text);
 		map.put(ChatMessage.COLUMN_NAME_CREATED_AT, dateFormat.format(date));
 		
-		if(service.sendMessage(me, participant, text)){
+		if(service.sendMessage(m)){
 			userInput.setText("");
 			adapter.add(map);
 		}else{
