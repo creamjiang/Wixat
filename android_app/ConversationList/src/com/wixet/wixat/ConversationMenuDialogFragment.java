@@ -13,14 +13,20 @@ import android.support.v4.app.DialogFragment;
 public class ConversationMenuDialogFragment extends DialogFragment {
 
 	String phone;
+	String conversationId;
+	String conversationName;
 	ContentResolver c;
 
 	public void setPhone(String phone){
 		this.phone = phone;
 	}
 	
+	public void setConversationId(String conversationId){
+		this.conversationId = conversationId;
+	}
+	
 	public void setContentResolver(ContentResolver c){
-		this.c = c;;
+		this.c = c;
 	}
 	
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -60,6 +66,10 @@ public class ConversationMenuDialogFragment extends DialogFragment {
 	            		    //nativeInfo = tabHost.newTabSpec("native info").setIndicator("N Info").setContent(intent);
 	            		   startActivity(intent);*/
 	            	   }else if(which == 1){
+	            		   Intent i = new Intent(getActivity(), ConversationSettingsActivity.class);
+	            		   i.putExtra(ConversationSettingsActivity.CONVERSATION, conversationId);
+	            		   i.putExtra(ConversationSettingsActivity.CONVERSATION_NAME, conversationName);
+	            	   		startActivity(i);
 	            		   //sendGoToNodesMessage();
 	            		   
 	            		   //DialogFragment nw = new ConversationOptionsDialogFragment();
@@ -68,6 +78,12 @@ public class ConversationMenuDialogFragment extends DialogFragment {
 	           }
 	    });
 	    return builder.create();
+	}
+
+	public void setConversationName(String participantDisplayName) {
+		conversationName = participantDisplayName;
+		// TODO Auto-generated method stub
+		
 	}
 	
 

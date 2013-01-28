@@ -20,6 +20,16 @@ import com.wixet.wixat.database.DataBaseHelper;
 
 public class XMPPManager extends Thread {
 	
+	
+	/* To say Dalvic reconnect wich makes the connection more stable */
+	static {
+	    try {
+	        Class.forName("org.jivesoftware.smack.ReconnectionManager");
+	    } catch (ClassNotFoundException ex) {
+	        // problem loading reconnection manager
+	    }
+	}
+	
 	public static final String NAMESPACE_CHATSTATES = "http://jabber.org/protocol/chatstates";
 	public static final int EVENT_EXTENSION = 0;
 	public static final int EVENT_NEW_CHAT = 1;

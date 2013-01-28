@@ -64,6 +64,12 @@
     <string name="no_matches_found">Ninguno de tus contactos tiene una cuenta Wixat</string>
     <string name="notice_not_connected">No se puede enviar el mensaje porque no hay conectividad de red</string>
     <string name="message_state">Estado del mensaje</string>
-    
+    <string name="title_activity_main_settings">MainSettingsActivity</string>
+    <string name="notifications">Notifications</string>
+    <string name="show_notifications">Show notifications</string>
+    <string name="enable_sound">Enable sound</string>
+    <string name="enable_vibration">Enable vibration</string>
+    <string name="title_activity_conversation_settings">ConversationSettingsActivity</string>
+    <string name="notification_conversation">Notifications for</string>
 
 </resources>

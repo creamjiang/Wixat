@@ -28,10 +28,11 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_toLeftOf="@+id/sendButton"
+        
         android:ems="10"
         android:hint="@string/blank"
         android:imeOptions="actionSend"
-        android:inputType="text|textNoSuggestions" >
+        android:inputType="text|textAutoCorrect" >
 
     </EditText>
     

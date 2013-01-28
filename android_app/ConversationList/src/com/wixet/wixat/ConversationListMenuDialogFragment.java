@@ -27,6 +27,9 @@ public class ConversationListMenuDialogFragment extends DialogFragment {
 	       		        	getActivity().startActivity(i);  
 	            		   //DialogFragment nw = new ConversationOptionsDialogFragment();
 	                   		//nw.show(getSupportFragmentManager(), "NoticeDialogFragment");
+	            	   }else if(which == 2){
+	            		    Intent i = new Intent(getActivity(), MainSettingsActivity.class);
+	            	   		startActivity(i);
 	            	   }
 	           }
 	    });

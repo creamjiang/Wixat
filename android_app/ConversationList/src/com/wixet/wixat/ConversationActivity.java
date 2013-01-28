@@ -163,8 +163,6 @@ public class ConversationActivity extends FragmentActivity {
         // Load contact name and thumbnail (de momento no se usa el thumbnail)
         participant = db.getParticipant(conversationId);
         
-        final Action menuAction = new DialogAction(this, showMenu(), R.drawable.ic_title_menu_default);
-        actionBar.addAction(menuAction);
         
         participantDisplayName = participant.split("@")[0];
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode( participantDisplayName));
@@ -188,14 +186,12 @@ public class ConversationActivity extends FragmentActivity {
             }
         
         /****************************************************/
+        final Action menuAction = new DialogAction(this, showMenu(), R.drawable.ic_title_menu_default);
+        actionBar.addAction(menuAction);
         actionBar.setTitle(participantDisplayName);
 		list=(ListView)findViewById(R.id.conversation);
 		
-		// Getting adapter by passing xml data ArrayList
-		adapter=new ConversationArrayAdapter(this, db.getMessagesData(conversationId), participant);
 		
-        //adapter=new ConversationCursorAdapter(this, R.layout.conversation_row_left ,db.getMessages(conversationId), me);
-        list.setAdapter(adapter);
 
         
         /********************************/
@@ -211,6 +207,8 @@ public class ConversationActivity extends FragmentActivity {
   		ConversationMenuDialogFragment nw = new ConversationMenuDialogFragment();
   		nw.setPhone(participant.split("@")[0]);
   		nw.setContentResolver(getContentResolver());
+  		nw.setConversationId(conversationId+"");
+  		nw.setConversationName(participantDisplayName);
   		
   		return nw;
     }
@@ -260,6 +258,15 @@ public class ConversationActivity extends FragmentActivity {
         Intent intent = new Intent(this, WixatService.class);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
         
+        
+        // Para que siempre que se muestre se cargue la lista de comentarios.
+        // Es para evitar que cuando tienes una notificacion que te lleva a una conversacion
+        // abierta pero en estado stop se muestre el mensaje
+     	adapter=new ConversationArrayAdapter(this, db.getMessagesData(conversationId), participant);
+     		
+        //adapter=new ConversationCursorAdapter(this, R.layout.conversation_row_left ,db.getMessages(conversationId), me);
+        list.setAdapter(adapter);
+        
     }
-
+    
 }

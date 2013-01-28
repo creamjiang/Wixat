@@ -352,6 +352,9 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     	    ChatMessage.COLUMN_NAME_CREATED_AT,
     	    };
     	
+    	if(!database.isOpen()){
+    		database = getWritableDatabase();
+    	}
     	Cursor c = database.query(
     		    ChatMessage.TABLE_NAME,  // The table to query
     		    projection,                               // The columns to return

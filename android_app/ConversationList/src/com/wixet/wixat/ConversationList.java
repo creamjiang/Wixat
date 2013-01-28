@@ -2,6 +2,7 @@ package com.wixet.wixat;
 
 
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
@@ -9,12 +10,14 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.database.ContentObserver;
+import android.database.Cursor;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.provider.BaseColumns;
 import android.provider.ContactsContract;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
@@ -68,7 +71,30 @@ public class ConversationList extends FragmentActivity  {
      		   call.setData(Uri.parse("tel:" + db.getParticipant(Integer.parseInt(""+selectedView.getTag())).split("@")[0] ));
      		   startActivity(call);
      		   
-     	   }
+     	  }else if(which == 2){
+		  	  Intent i = new Intent(getApplicationContext(), ConversationSettingsActivity.class);
+		  	  i.putExtra(ConversationSettingsActivity.CONVERSATION, selectedView.getTag()+"");
+		  	  // Todo hacer esto de buscar el nombre mas homogeneo
+		  	  /* Obtener el nombre */
+			  	String conversationName = db.getParticipant(Integer.parseInt(""+selectedView.getTag())).split("@")[0] ;
+		        Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode( conversationName));
+		        ContentResolver contentResolver = getContentResolver();
+		        Cursor contactLookup = contentResolver.query(uri, new String[] {BaseColumns._ID,
+		                ContactsContract.PhoneLookup.DISPLAY_NAME }, null, null, null);
+		        
+		            if (contactLookup != null && contactLookup.getCount() > 0) {
+		                contactLookup.moveToNext();
+		                conversationName = contactLookup.getString(contactLookup.getColumnIndex(ContactsContract.Data.DISPLAY_NAME));
+
+		                
+		                
+		                
+		                contactLookup.close();
+		            }
+		            
+		  	  i.putExtra(ConversationSettingsActivity.CONVERSATION_NAME, conversationName);
+		  	  startActivity(i);
+     	  }
         }
 	};
 	
@@ -201,6 +227,8 @@ public class ConversationList extends FragmentActivity  {
 	        		  	
 	        		  	int conversationId =Integer.parseInt(view.getTag()+"");
 	        		    Intent i = new Intent(getApplicationContext(), ConversationActivity.class);
+	        		    //TODO evitar el no_history
+	        		    i.addFlags(android.content.Intent.FLAG_ACTIVITY_NO_HISTORY);
 	        		    i.putExtra(ConversationActivity.CONVERSATION_ID, conversationId);
 	        		    startActivity(i);
 	        		    

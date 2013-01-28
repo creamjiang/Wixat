@@ -17,8 +17,10 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.provider.BaseColumns;
 import android.provider.ContactsContract;
+
 import com.wixet.wixat.ConversationActivity;
 import com.wixet.wixat.ConversationList;
+import com.wixet.wixat.MainSettingsActivity;
 import com.wixet.wixat.R;
 import com.wixet.wixat.database.DataBaseHelper;
 
@@ -44,7 +46,7 @@ public class WixatService extends Service{
     private DataBaseHelper db; 
     private NotificationManager mNotificationManager;
     private String actualParticipant ="";
-    
+    SharedPreferences settings;
     
     /**
      * Class used for the client Binder.  Because we know this service always
@@ -66,8 +68,7 @@ public class WixatService extends Service{
 		//Log.d("SERVICIO","ONCREATE");
         super.onCreate();
          
-		
-		  SharedPreferences settings = getSharedPreferences(ConversationList.CONFIGURATION, 0);
+		  settings = getSharedPreferences(ConversationList.CONFIGURATION, 0);
 		  String username = settings.getString(ConversationList.TELEPHONE, null);
 		  String password = settings.getString(ConversationList.PASSWORD, null);
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -106,52 +107,74 @@ public class WixatService extends Service{
     
     public void showNotification(int conversationId){
         
-    	 
-    	//Log.d("NOTIFICATION","FOR: "+conversationId);
-    	
-    	// Get display name
-        String name = db.getParticipant(conversationId).split("@")[0];
-        Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode( name));
-        
-
-        // Load contact name and thumbnail
-        Cursor contactLookup = getContentResolver().query(uri, new String[] {BaseColumns._ID,
-                ContactsContract.PhoneLookup.DISPLAY_NAME }, null, null, null);
-        
-        
-            if (contactLookup != null && contactLookup.getCount() > 0) {
-                contactLookup.moveToNext();
-                name = contactLookup.getString(contactLookup.getColumnIndex(ContactsContract.Data.DISPLAY_NAME));
-                
-                contactLookup.close();
-            }
-            
-    	
-    	final Notification notifyDetails = new Notification(R.drawable.ic_launcher,name,System.currentTimeMillis());
-    	//Add vibrate permissions if needed
-    	long[] vibrate = {100,100,200,300};
-    	notifyDetails.flags |= Notification.FLAG_AUTO_CANCEL;
-    	notifyDetails.vibrate = vibrate;
-
-    	notifyDetails.defaults =Notification.DEFAULT_ALL;
-    	Context context = getApplicationContext();
-    	
-    	
-
-            
-    	CharSequence contentTitle = name;
-    	CharSequence contentText = "Nuevos mensajes";
-
-    	Intent notifyIntent = new Intent(context, ConversationActivity.class);
-    	notifyIntent.putExtra(ConversationActivity.CONVERSATION_ID, conversationId);
-
-    	PendingIntent intent =
-    	PendingIntent.getActivity(this, 0,
-    	notifyIntent, android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
-
-    	notifyDetails.setLatestEventInfo(context, contentTitle, contentText, intent);
-
-    	mNotificationManager.notify(conversationId, notifyDetails);
+    	//Show only if notifications are enabled (also in conversation)
+    	if(settings.getBoolean(MainSettingsActivity.SHOW_NOTIFICATION, true) && settings.getBoolean(MainSettingsActivity.SHOW_NOTIFICATION+":"+conversationId, true)){ 
+	    	//Log.d("NOTIFICATION","FOR: "+conversationId);
+	    	
+	    	// Get display name
+	        String name = db.getParticipant(conversationId).split("@")[0];
+	        Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode( name));
+	        
+	
+	        // Load contact name and thumbnail
+	        Cursor contactLookup = getContentResolver().query(uri, new String[] {BaseColumns._ID,
+	                ContactsContract.PhoneLookup.DISPLAY_NAME }, null, null, null);
+	        
+	        
+	            if (contactLookup != null && contactLookup.getCount() > 0) {
+	                contactLookup.moveToNext();
+	                name = contactLookup.getString(contactLookup.getColumnIndex(ContactsContract.Data.DISPLAY_NAME));
+	                
+	                contactLookup.close();
+	            }
+	            
+	    	
+	    	final Notification notifyDetails = new Notification(R.drawable.ic_launcher,name,System.currentTimeMillis());
+	    	//Add vibrate permissions if needed
+	    	
+	    	notifyDetails.flags |= Notification.FLAG_AUTO_CANCEL;
+	    	
+	    	
+	    	//notifyDetails.defaults = Notification.DEFAULT_ALL;
+	    	
+	    	if(settings.getBoolean(MainSettingsActivity.ENABLE_VIBRATION, true) && settings.getBoolean(MainSettingsActivity.ENABLE_VIBRATION+":"+conversationId, true)){
+	    		long[] vibrate = {100,100,200,300};
+	    		notifyDetails.vibrate = vibrate;
+	    	}else{
+	    		long[] vibrate = {0,0,0,0};
+	    		notifyDetails.vibrate = vibrate;
+	    	}
+	    	
+	    	if(settings.getBoolean(MainSettingsActivity.ENABLE_SOUND, true) && settings.getBoolean(MainSettingsActivity.ENABLE_SOUND+":"+conversationId, true)){
+	    		notifyDetails.defaults |= Notification.DEFAULT_SOUND;
+	    	}else{
+	    		
+	    		notifyDetails.sound = null;
+	    	}
+	    	
+	    	Context context = getApplicationContext();
+	    	
+	    	
+	
+	            
+	    	CharSequence contentTitle = name;
+	    	CharSequence contentText = "Nuevos mensajes";
+	
+	    	Intent notifyIntent = new Intent(context, ConversationActivity.class);
+	    	notifyIntent.putExtra(ConversationActivity.CONVERSATION_ID, conversationId);
+	
+	    	//TODO evitar el no_history
+	    	PendingIntent intent =
+	    	PendingIntent.getActivity(this, 0,
+	    	notifyIntent, android.content.Intent.FLAG_ACTIVITY_NEW_TASK | android.content.Intent.FLAG_ACTIVITY_NO_HISTORY);
+	    	//notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_ONE_SHOT);
+	    			
+	    	//notifyIntent, 0);
+	
+	    	notifyDetails.setLatestEventInfo(context, contentTitle, contentText, intent);
+	
+	    	mNotificationManager.notify(conversationId, notifyDetails);
+    	}
 
     }
     
@@ -209,7 +232,7 @@ public class WixatService extends Service{
 				e.printStackTrace();
 			}
     		sent = true;
-    	}else if(bindedType == TYPE_CONVERSATION_LIST){
+    	}else /* any other case. if(bindedType == TYPE_CONVERSATION_LIST)*/{
     		db.setAsRead(conversationId, false);
     		sent = notifyRefresh();
     		

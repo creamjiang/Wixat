@@ -3,15 +3,18 @@
 	<string-array name="conversationListOptions">
 	   <item>Eliminar conversación</item>
 	   <item>Llamar</item>
+	   <item>Configuración de la conversación</item>
 	</string-array>
 	
 	<string-array name="conversationListMenu">
 	   <item>Nueva conversación</item>
 	   <item>Configurar nodos</item>
+	   <item>Configuración general</item>
 	</string-array>
 	
 	<string-array name="conversationMenu">
 	   <item>Llamar</item>
+	   <item>Configuración</item>
 	</string-array>
 
 	

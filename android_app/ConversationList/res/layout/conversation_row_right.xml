@@ -17,7 +17,7 @@
 	        android:text=""
 	        android:textColor="#040404"
 	        android:typeface="sans" 
-	        android:textSize="12sp"
+	        android:textSize="16sp"
 	        android:textStyle="bold"/>
 	
 		<!-- Text -->
@@ -27,7 +27,7 @@
 	        android:layout_height="wrap_content"
 	        android:layout_below="@id/name"
 	        android:textColor="#343434"
-	        android:textSize="10sp"
+	        android:textSize="16sp"
 	        android:layout_marginTop="1dip"
 	        android:text="" />
 	

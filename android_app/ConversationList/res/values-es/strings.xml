@@ -61,6 +61,13 @@
     <string name="title_activity_first_time_write_password_loading">Cargando</string>
     <string name="no_matches_found">Ninguno de tus contactos tiene una cuenta Wixat</string>
     <string name="notice_not_connected">No se puede enviar el mensaje porque no hay conectividad de red</string>
-     <string name="message_state">Estado del mensaje</string>
+    <string name="message_state">Estado del mensaje</string>
+    <string name="title_activity_main_settings">MainSettingsActivity</string>
+    <string name="notifications">Notificaciones</string>
+    <string name="show_notifications">Mostrar notificaciones</string>
+    <string name="enable_sound">Activar sonido</string>
+    <string name="enable_vibration">Activar vibración</string>
+    <string name="title_activity_conversation_settings">ConversationSettingsActivity</string>
+    <string name="notification_conversation">Notificaciones para</string>
 
 </resources>
